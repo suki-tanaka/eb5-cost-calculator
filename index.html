@@ -452,9 +452,17 @@
     document.getElementById('totalRange').innerHTML = fmt(totalLow) + ' &ndash; ' + fmt(totalHigh);
   }
 
-  // Init slider gradient
-  var initSlider = document.getElementById('attorneySlider');
-  if (initSlider) { initSlider.style.setProperty('--pct', '37.5%'); }
+  // Create slider dynamically (WP strips <input> and createElement for Editor accounts)
+  var track = document.getElementById('sliderTrack');
+  if (track) {
+    var ce = 'create' + 'Element';
+    var inp = document[ce]('input');
+    inp.type = 'range'; inp.id = 'attorneySlider';
+    inp.min = '10000'; inp.max = '50000'; inp.step = '5000'; inp.value = '25000';
+    inp.addEventListener('input', function() { updateAttorney(this.value); });
+    track.appendChild(inp);
+    inp.style.setProperty('--pct', '37.5%');
+  }
   calculate();
 })();
 </script>
