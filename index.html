@@ -27,26 +27,14 @@
   /* Header */
   .calc-header {
     text-align: center;
-    margin-bottom: 36px;
-  }
-  .calc-badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #6366f1;
-    background: #eef2ff;
-    padding: 5px 14px;
-    border-radius: 100px;
-    margin-bottom: 14px;
+    margin-bottom: 28px;
   }
   .calc-title {
     font-size: 30px;
     font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.5px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .calc-desc {
     font-size: 15px;
@@ -119,7 +107,7 @@
 
   /* Stepper */
   .stepper-row {
-    display: flex; align-items: center; gap: 14px;
+    display: inline-flex; align-items: center; gap: 14px;
     background: #f8fafc; border: 2px solid #e2e8f0;
     border-radius: 10px; padding: 10px 16px;
   }
@@ -172,12 +160,11 @@
     margin: 0;
     padding: 16px 22px;
     background: linear-gradient(135deg, #1e1b4b, #312e81);
-    display: flex; justify-content: space-between; align-items: center;
+    text-align: center;
   }
-  .s-total-left {}
-  .s-total-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); }
-  .s-total-note { font-size: 11px; color: rgba(255,255,255,0.5); }
-  .s-total-amount { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .s-total-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .s-total-amount { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .s-total-note { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
 
   /* CTA */
   .s-cta {
@@ -218,7 +205,6 @@
 
 <div class="calc-shell">
   <div class="calc-header">
-    <div class="calc-badge">Interactive Tool</div>
     <h1 class="calc-title">EB-5 Cost Calculator</h1>
     <p class="calc-desc">Estimate the total cost of your EB-5 investment, including fees, government filings, and related expenses.</p>
   </div>
@@ -349,11 +335,9 @@
         </div>
 
         <div class="s-total">
-          <div class="s-total-left">
-            <div class="s-total-label">Estimated Total</div>
-            <div class="s-total-note">Including capital investment</div>
-          </div>
+          <div class="s-total-label">Estimated Total</div>
           <div class="s-total-amount" id="totalRange">$906,050 &ndash; $955,700</div>
+          <div class="s-total-note">Including capital investment</div>
         </div>
 
         <div class="s-cta">
