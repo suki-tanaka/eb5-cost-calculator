@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EB-5 Cost Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: transparent;
+    color: #1a1a2e;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .calc-shell {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Header */
+  .calc-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .calc-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #6366f1;
+    background: #eef2ff;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+  }
+  .calc-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .calc-desc {
+    font-size: 15px;
+    color: #64748b;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* Two-column layout */
+  .calc-grid {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .calc-inputs {
+    flex: 1;
+    min-width: 0;
+  }
+  .calc-summary {
+    width: 380px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+  }
+
+  /* Input sections */
+  .input-section { margin-bottom: 24px; }
+  .input-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 3px;
+  }
+  .input-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+
+  /* Toggle buttons */
+  .toggle-row { display: flex; gap: 8px; }
+  .toggle-option {
+    flex: 1;
+    position: relative;
+    padding: 12px 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-family: inherit;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.4;
+  }
+  .toggle-option:hover { border-color: #cbd5e1; background: #f8fafc; }
+  .toggle-option.active { border-color: #6366f1; background: #f5f3ff; color: #3730a3; }
+  .toggle-option .opt-title { display: block; font-weight: 600; font-size: 13px; margin-bottom: 1px; }
+  .toggle-option .opt-amount { display: block; font-weight: 700; font-size: 16px; color: #0f172a; margin-top: 3px; }
+  .toggle-option.active .opt-amount { color: #4338ca; }
+  .toggle-option .check-mark {
+    position: absolute; top: 8px; right: 8px;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #e2e8f0; transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toggle-option.active .check-mark { background: #6366f1; border-color: #6366f1; }
+  .toggle-option.active .check-mark::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+
+  /* Stepper */
+  .stepper-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #f8fafc; border: 2px solid #e2e8f0;
+    border-radius: 10px; padding: 10px 16px;
+  }
+  .stepper-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 2px solid #e2e8f0; background: #fff;
+    font-size: 16px; font-weight: 600; color: #475569;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all 0.15s ease;
+    font-family: inherit; line-height: 1; padding: 0;
+  }
+  .stepper-btn:hover { border-color: #6366f1; color: #6366f1; background: #f5f3ff; }
+  .stepper-btn:active { transform: scale(0.95); }
+  .stepper-num { font-size: 24px; font-weight: 800; color: #0f172a; min-width: 28px; text-align: center; }
+  .stepper-text { font-size: 13px; color: #64748b; }
+
+  /* Summary card */
+  .summary-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .summary-head {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .summary-head-title {
+    font-size: 15px; font-weight: 700; color: #0f172a;
+  }
+  .summary-body { padding: 6px 22px 18px; }
+  .s-cat {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.1px; color: #94a3b8;
+    margin-top: 14px; margin-bottom: 6px;
+  }
+  .s-cat:first-child { margin-top: 8px; }
+  .s-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px solid #f8fafc;
+  }
+  .s-row:last-of-type { border-bottom: none; }
+  .s-name { font-size: 13px; color: #334155; flex: 1; padding-right: 12px; }
+  .s-note { font-size: 11px; color: #94a3b8; }
+  .s-val { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; }
+
+  /* Total */
+  .s-total {
+    margin: 0;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .s-total-left {}
+  .s-total-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); }
+  .s-total-note { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .s-total-amount { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+
+  /* CTA */
+  .s-cta {
+    padding: 16px 22px;
+    background: #fafafa;
+    text-align: center;
+  }
+  .cta-btn {
+    display: inline-block; width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff; font-family: inherit;
+    font-size: 14px; font-weight: 600;
+    border: none; border-radius: 10px;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  }
+  .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
+
+  /* Disclaimer */
+  .disclaimer {
+    margin-top: 28px; font-size: 11px; color: #94a3b8;
+    line-height: 1.6; text-align: center;
+    max-width: 600px; margin-left: auto; margin-right: auto;
+  }
+
+  /* Mobile: stack vertically */
+  @media (max-width: 800px) {
+    .calc-grid { flex-direction: column; gap: 24px; }
+    .calc-summary { width: 100%; position: static; }
+    .calc-title { font-size: 24px; }
+    .toggle-row { flex-direction: column; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="calc-shell">
+  <div class="calc-header">
+    <div class="calc-badge">Interactive Tool</div>
+    <h1 class="calc-title">EB-5 Cost Calculator</h1>
+    <p class="calc-desc">Estimate the total cost of your EB-5 investment, including fees, government filings, and related expenses.</p>
+  </div>
+
+  <div class="calc-grid">
+    <!-- LEFT: Inputs -->
+    <div class="calc-inputs">
+      <div class="input-section">
+        <div class="input-label">Investment Area</div>
+        <div class="input-hint">TEA projects qualify for a lower minimum investment</div>
+        <div class="toggle-row">
+          <button class="toggle-option active" data-field="area" data-value="tea" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">TEA</span>Rural or High Unemployment
+            <span class="opt-amount">$800,000</span>
+          </button>
+          <button class="toggle-option" data-field="area" data-value="nontea" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Non-TEA</span>Standard Area
+            <span class="opt-amount">$1,050,000</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-label">Investment Structure</div>
+        <div class="input-hint">Most EB-5 investors use a USCIS-approved regional center</div>
+        <div class="toggle-row">
+          <button class="toggle-option active" data-field="structure" data-value="rc" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Regional Center</span>Pooled, passive role
+          </button>
+          <button class="toggle-option" data-field="structure" data-value="direct" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Direct Investment</span>Own or manage the enterprise
+          </button>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-label">Total Applicants</div>
+        <div class="input-hint">Include yourself, spouse, and unmarried children under 21</div>
+        <div class="stepper-row">
+          <button class="stepper-btn" onclick="adjustFamily(-1)">&minus;</button>
+          <span class="stepper-num" id="familyCount">1</span>
+          <span class="stepper-text" id="familyText">applicant</span>
+          <button class="stepper-btn" onclick="adjustFamily(1)">+</button>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <div class="input-label">Attorney Fee Estimate</div>
+        <div class="input-hint">Varies by case complexity and attorney experience</div>
+        <div class="toggle-row">
+          <button class="toggle-option" data-field="attorney" data-value="low" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Standard</span>
+            <span class="opt-amount">$15,000</span>
+          </button>
+          <button class="toggle-option active" data-field="attorney" data-value="mid" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Typical</span>
+            <span class="opt-amount">$25,000</span>
+          </button>
+          <button class="toggle-option" data-field="attorney" data-value="high" onclick="setToggle(this)">
+            <span class="check-mark"></span>
+            <span class="opt-title">Complex</span>
+            <span class="opt-amount">$35,000</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sticky Summary -->
+    <div class="calc-summary">
+      <div class="summary-card">
+        <div class="summary-head">
+          <div class="summary-head-title">Cost Breakdown</div>
+        </div>
+        <div class="summary-body">
+          <div class="s-cat">Investment</div>
+          <div class="s-row">
+            <div class="s-name">Capital Investment<br><span class="s-note" id="investNote">TEA area</span></div>
+            <div class="s-val" id="investAmount">$800,000</div>
+          </div>
+
+          <div class="s-cat">Legal &amp; Professional</div>
+          <div class="s-row">
+            <div class="s-name">Attorney Fees<br><span class="s-note">I-526E prep &amp; filing</span></div>
+            <div class="s-val" id="attorneyFee">$25,000</div>
+          </div>
+          <div class="s-row" id="adminRow">
+            <div class="s-name">Regional Center Fee<br><span class="s-note">Admin / subscription</span></div>
+            <div class="s-val" id="adminFee">$70k &ndash; $80k</div>
+          </div>
+
+          <div class="s-cat">Government Fees</div>
+          <div class="s-row">
+            <div class="s-name">I-526E Filing</div>
+            <div class="s-val">$3,675</div>
+          </div>
+          <div class="s-row">
+            <div class="s-name">I-829 Filing</div>
+            <div class="s-val">$3,750</div>
+          </div>
+          <div class="s-row">
+            <div class="s-name">Biometrics<br><span class="s-note" id="bioNote">$85 x 1</span></div>
+            <div class="s-val" id="bioFee">$85</div>
+          </div>
+          <div class="s-row">
+            <div class="s-name">Consular Processing<br><span class="s-note" id="visaNote">~$190 x 1</span></div>
+            <div class="s-val" id="visaFee">$190</div>
+          </div>
+
+          <div class="s-cat">Other</div>
+          <div class="s-row">
+            <div class="s-name">Medical Exams<br><span class="s-note" id="medNote">~$350 x 1</span></div>
+            <div class="s-val" id="medFee">$350</div>
+          </div>
+          <div class="s-row">
+            <div class="s-name">Translation</div>
+            <div class="s-val">$1k &ndash; $3k</div>
+          </div>
+          <div class="s-row">
+            <div class="s-name">Travel &amp; Misc</div>
+            <div class="s-val">$2k &ndash; $5k</div>
+          </div>
+        </div>
+
+        <div class="s-total">
+          <div class="s-total-left">
+            <div class="s-total-label">Estimated Total</div>
+            <div class="s-total-note">Including capital investment</div>
+          </div>
+          <div class="s-total-amount" id="totalRange">$906,050 &ndash; $955,700</div>
+        </div>
+
+        <div class="s-cta">
+          <a href="https://eb5insider.com/start/" class="cta-btn">Get Started With EB-5 &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    This calculator provides estimates only and does not constitute legal or financial advice. Actual costs vary based on your situation, attorney, regional center, and country of origin. Filing fees reflect USCIS published rates as of 2024 and may change. Consult a qualified EB-5 immigration attorney for personalized guidance.
+  </p>
+</div>
+
+<script>
+(function() {
+  var state = { area: 'tea', structure: 'rc', family: 1, attorney: 'mid' };
+
+  window.setToggle = function(btn) {
+    var field = btn.getAttribute('data-field');
+    var value = btn.getAttribute('data-value');
+    state[field] = value;
+    var siblings = btn.parentNode.querySelectorAll('.toggle-option');
+    for (var i = 0; i < siblings.length; i++) siblings[i].classList.remove('active');
+    btn.classList.add('active');
+    calculate();
+  };
+
+  window.adjustFamily = function(delta) {
+    state.family = Math.max(1, Math.min(8, state.family + delta));
+    document.getElementById('familyCount').textContent = state.family;
+    document.getElementById('familyText').textContent = state.family === 1 ? 'applicant' : 'applicants';
+    calculate();
+  };
+
+  function fmt(n) { return '$' + n.toLocaleString('en-US'); }
+  function fmtK(n) { return n >= 1000 ? '$' + (n/1000) + 'k' : '$' + n; }
+
+  function calculate() {
+    var invest = state.area === 'tea' ? 800000 : 1050000;
+    document.getElementById('investAmount').textContent = fmt(invest);
+    document.getElementById('investNote').textContent = state.area === 'tea' ? 'TEA area' : 'Non-TEA area';
+
+    var attMap = { low: 15000, mid: 25000, high: 35000 };
+    var attFee = attMap[state.attorney];
+    document.getElementById('attorneyFee').textContent = fmt(attFee);
+
+    var adminRow = document.getElementById('adminRow');
+    var adminLow = 0, adminHigh = 0;
+    if (state.structure === 'rc') {
+      adminRow.style.display = 'flex';
+      adminLow = 70000; adminHigh = 80000;
+    } else {
+      adminRow.style.display = 'none';
+    }
+
+    var fam = state.family;
+    var bio = 85 * fam, visa = 190 * fam, med = 350 * fam;
+
+    document.getElementById('bioFee').textContent = fmt(bio);
+    document.getElementById('bioNote').textContent = '$85 x ' + fam;
+    document.getElementById('visaFee').textContent = fmt(visa);
+    document.getElementById('visaNote').textContent = '~$190 x ' + fam;
+    document.getElementById('medFee').textContent = fmt(med);
+    document.getElementById('medNote').textContent = '~$350 x ' + fam;
+
+    var i526 = 3675, i829 = 3750;
+    var transLow = 1000, transHigh = 3000;
+    var travelLow = 2000, travelHigh = 5000;
+
+    var totalLow = invest + attFee + adminLow + i526 + i829 + bio + visa + med + transLow + travelLow;
+    var totalHigh = invest + attFee + adminHigh + i526 + i829 + bio + visa + med + transHigh + travelHigh;
+
+    document.getElementById('totalRange').innerHTML = fmt(totalLow) + ' &ndash; ' + fmt(totalHigh);
+  }
+
+  calculate();
+})();
+</script>
+
+</body>
+</html>
