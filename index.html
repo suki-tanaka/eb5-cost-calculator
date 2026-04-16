@@ -105,6 +105,45 @@
   .toggle-option.active .check-mark { background: #6366f1; border-color: #6366f1; }
   .toggle-option.active .check-mark::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 
+  /* Slider */
+  .slider-container {
+    background: #f8fafc; border: 2px solid #e2e8f0;
+    border-radius: 10px; padding: 16px 20px;
+  }
+  .slider-value-display {
+    font-size: 28px; font-weight: 800; color: #0f172a;
+    text-align: center; margin-bottom: 12px; letter-spacing: -0.5px;
+  }
+  .slider-track {
+    position: relative; width: 100%; height: 36px;
+    display: flex; align-items: center;
+  }
+  .slider-track input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: linear-gradient(to right, #6366f1 var(--pct, 40%), #e2e8f0 var(--pct, 40%));
+    outline: none; cursor: pointer;
+  }
+  .slider-track input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #6366f1; border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer; transition: box-shadow 0.15s;
+  }
+  .slider-track input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(99,102,241,0.15);
+  }
+  .slider-track input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #6366f1; border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15); cursor: pointer;
+  }
+  .slider-labels {
+    display: flex; justify-content: space-between;
+    margin-top: 6px; font-size: 11px; color: #94a3b8;
+  }
+
   /* Stepper */
   .stepper-row {
     display: inline-flex; align-items: center; gap: 14px;
@@ -257,23 +296,14 @@
 
       <div class="input-section">
         <div class="input-label">Attorney Fee Estimate</div>
-        <div class="input-hint">Varies by case complexity and attorney experience</div>
-        <div class="toggle-row">
-          <button class="toggle-option" data-field="attorney" data-value="low" onclick="setToggle(this)">
-            <span class="check-mark"></span>
-            <span class="opt-title">Standard</span>
-            <span class="opt-amount">$15,000</span>
-          </button>
-          <button class="toggle-option active" data-field="attorney" data-value="mid" onclick="setToggle(this)">
-            <span class="check-mark"></span>
-            <span class="opt-title">Typical</span>
-            <span class="opt-amount">$25,000</span>
-          </button>
-          <button class="toggle-option" data-field="attorney" data-value="high" onclick="setToggle(this)">
-            <span class="check-mark"></span>
-            <span class="opt-title">Complex</span>
-            <span class="opt-amount">$35,000</span>
-          </button>
+        <div class="input-hint">Drag to adjust based on your expected legal costs</div>
+        <div class="slider-container" id="attorneySliderWrap">
+          <div class="slider-value-display" id="sliderDisplay">$25,000</div>
+          <div class="slider-track" id="sliderTrack"></div>
+          <div class="slider-labels">
+            <span>$10,000</span>
+            <span>$50,000</span>
+          </div>
         </div>
       </div>
     </div>
@@ -354,7 +384,7 @@
 
 <script>
 (function() {
-  var state = { area: 'tea', structure: 'rc', family: 1, attorney: 'mid' };
+  var state = { area: 'tea', structure: 'rc', family: 1, attorney: 25000 };
 
   window.setToggle = function(btn) {
     var field = btn.getAttribute('data-field');
@@ -373,16 +403,24 @@
     calculate();
   };
 
+  window.updateAttorney = function(val) {
+    val = parseInt(val, 10);
+    state.attorney = val;
+    document.getElementById('sliderDisplay').textContent = fmt(val);
+    var slider = document.getElementById('attorneySlider');
+    var pct = ((val - 10000) / (50000 - 10000)) * 100;
+    slider.style.setProperty('--pct', pct + '%');
+    calculate();
+  };
+
   function fmt(n) { return '$' + n.toLocaleString('en-US'); }
-  function fmtK(n) { return n >= 1000 ? '$' + (n/1000) + 'k' : '$' + n; }
 
   function calculate() {
     var invest = state.area === 'tea' ? 800000 : 1050000;
     document.getElementById('investAmount').textContent = fmt(invest);
     document.getElementById('investNote').textContent = state.area === 'tea' ? 'TEA area' : 'Non-TEA area';
 
-    var attMap = { low: 15000, mid: 25000, high: 35000 };
-    var attFee = attMap[state.attorney];
+    var attFee = state.attorney;
     document.getElementById('attorneyFee').textContent = fmt(attFee);
 
     var adminRow = document.getElementById('adminRow');
@@ -414,6 +452,9 @@
     document.getElementById('totalRange').innerHTML = fmt(totalLow) + ' &ndash; ' + fmt(totalHigh);
   }
 
+  // Init slider gradient
+  var initSlider = document.getElementById('attorneySlider');
+  if (initSlider) { initSlider.style.setProperty('--pct', '37.5%'); }
   calculate();
 })();
 </script>
